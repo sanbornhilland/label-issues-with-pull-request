@@ -10,10 +10,10 @@
     "test": "mocha && standard"
   },
   "dependencies": {
-    "chai": "^4.1.2",
     "probot": "^2.0.0"
   },
   "devDependencies": {
+    "chai": "^4.1.2",
     "expect": "^1.20.2",
     "localtunnel": "^1.8.2",
     "mocha": "^3.5.3",
