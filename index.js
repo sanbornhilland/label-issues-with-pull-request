@@ -1,9 +1,10 @@
-const parser = require('./parser.js')
+const parser = require('./lib/parser.js')
+const defaultConfig = require('./lib/defaultConfig.js')
 
 const LABEL = 'pull request open'
 const PINK = 'f767eb'
 
-async function getClosedIssues(context) {
+async function getClosedIssues(context, keywords) {
   const issueInfo = context.issue()
   const commits = await context.github.pullRequests.getCommits(issueInfo)
 
@@ -11,44 +12,62 @@ async function getClosedIssues(context) {
     .map(({ commit }) => commit.message.toLowerCase())
     .join('\n')
 
-  return parser.extractIssueNumbers(filteredMessages)
+  return parser.extractIssueNumbers(filteredMessages, keywords)
 }
 
-async function createLabelIfNecessary(context) {
+async function createLabelIfNecessary(context, labelName, labelColor) {
   const repoInfo = context.repo()
   const labels = await context.github.issues.getLabels(repoInfo)
 
-  if (!labels.data.some(({ name }) => name === LABEL)) {
+  if (!labels.data.some(({ name }) => name === labelName)) {
     await context.github.issues.createLabel({
       ...repoInfo,
-      name: LABEL,
-      color: PINK,
+      name: labelName,
+      color: labelColor,
     })
+  }
+}
+
+async function getUserConfig(context) {
+  const userConfig = await context.config('config.yml')
+
+  return userConfig && userConfig.labelPullRequests ? userConfig.labelPullRequests : {}
+}
+
+async function getConfig(context) {
+  const userConfig = await getUserConfig(context)
+
+  return {
+    ...defaultConfig,
+    ...userConfig,
   }
 }
 
 module.exports = (robot) => {
   robot.on('pull_request.closed', async context => {
-    const closedIssues = await getClosedIssues(context)
+    const { labelName, keywords } = await getConfig(context)
+    const closedIssues = await getClosedIssues(context, keywords)
 
     closedIssues.forEach((issue) => {
       context.github.issues.removeLabel(context.repo({
         number: issue,
-        name: LABEL,
+        name: labelName,
       }))
+      .catch(robot.error)
     })
   })
 
   robot.on('pull_request.opened', async context => {
+    const { labelName, labelColor, keywords } = await getConfig(context)
+    const closedIssues = await getClosedIssues(context, keywords)
+    await createLabelIfNecessary(context, labelName, labelColor)
     const repoInfo = context.repo()
-    const closedIssues = await getClosedIssues(context)
-    await createLabelIfNecessary(context)
 
     closedIssues.forEach((issue) => {
       context.github.issues.addLabels({
         ...repoInfo,
         number: issue,
-        labels: [LABEL],
+        labels: [labelName],
       })
     })
   })

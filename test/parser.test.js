@@ -1,4 +1,5 @@
-const parser = require('./parser.js')
+const parser = require('../lib/parser.js')
+const { keywords } = require('../lib/defaultConfig.js')
 const { assert } = require('chai')
 
 describe('extractIssueNumber', () => {
@@ -28,7 +29,7 @@ describe('extractIssueNumber', () => {
   }]
 
   testStringTemplates.forEach(({ stringTemplate, issueNumber }) => {
-    parser.keywords.forEach((keyword) => {
+    keywords.forEach((keyword) => {
       it(`should return the ${keyword} issue number`, () => {
         const testString = stringTemplate.replace('$KEYWORD', keyword)
 
@@ -38,7 +39,7 @@ describe('extractIssueNumber', () => {
   })
 
   it('should extract all issue numbers', () => {
-    const issues = parser.extractIssueNumbers('change 4\n\ncloses #1\nfixes #2fixed#12')
+    const issues = parser.extractIssueNumbers('change 4\n\ncloses #1\nfixes #2fixed#12', keywords)
 
     assert.equal(issues.length, 3)
     assert.equal(issues.includes(1), true)
