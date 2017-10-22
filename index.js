@@ -1,9 +1,6 @@
 const parser = require('./lib/parser.js')
 const defaultConfig = require('./lib/defaultConfig.js')
 
-const LABEL = 'pull request open'
-const PINK = 'f767eb'
-
 async function getClosedIssues(context, keywords) {
   const issueInfo = context.issue()
   const commits = await context.github.pullRequests.getCommits(issueInfo)
@@ -49,6 +46,7 @@ module.exports = (robot) => {
     const closedIssues = await getClosedIssues(context, keywords)
 
     closedIssues.forEach((issue) => {
+      // I don't know why I can't do await with a try/catch here.
       context.github.issues.removeLabel(context.repo({
         number: issue,
         name: labelName,
