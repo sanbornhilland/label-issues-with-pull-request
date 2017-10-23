@@ -7,4 +7,5 @@ notifications:
 install:
   npm install
 script:
-  npm test && npm coverage
+  npm test
+  npm run coverage
