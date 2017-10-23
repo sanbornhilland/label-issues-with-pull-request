@@ -8,7 +8,7 @@
   "scripts": {
     "start": "probot run ./index.js",
     "test": "mocha && eslint **/*.js",
-    "report-coverage": "nyc report --reporter=lcov > coverage.lcov && codecov"
+    "coverage": "nyc report --reporter=lcov > coverage.lcov && codecov"
   },
   "dependencies": {
     "probot": "^2.0.0"

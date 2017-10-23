@@ -3,6 +3,7 @@
 > A GitHub App built with [probot](https://github.com/probot/probot) that automatically labels issues targeted by currently open pull requests. See at a glance which open issues are addressed by an open pull request.
 
 [![Build Status](https://travis-ci.org/sanbornhilland/label-issues-with-pull-request.svg?branch=master)](https://travis-ci.org/sanbornhilland/label-issues-with-pull-request)
+[![codecov](https://codecov.io/gh/sanbornhilland/label-issues-with-pull-request/branch/master/graph/badge.svg)](https://codecov.io/gh/sanbornhilland/label-issues-with-pull-request)
 
 ## THIS IS STILL A WORK IN PROGRESS
 
