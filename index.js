@@ -48,25 +48,31 @@ async function getConfig(context, robot) {
   return config
 }
 
-module.exports = (robot) => {
-  robot.on('pull_request.opened', async context => {
-    const { labelName, labelColor, keywords } = await getConfig(context, robot)
-    const closedIssues = await getClosedIssues(context, keywords)
-    await createLabelIfNecessary(context, robot, labelName, labelColor)
-    const repoInfo = context.repo()
+async function handleOpenedPr(robot, context) {
+  const { labelName, labelColor, keywords } = await getConfig(context, robot)
+  const closedIssues = await getClosedIssues(context, keywords)
+  await createLabelIfNecessary(context, robot, labelName, labelColor)
+  const repoInfo = context.repo()
 
-    robot.log.debug('[PR OPENED] Issues that will be closed by this PR: ', closedIssues)
+  robot.log.debug('[PR OPENED] Issues that will be closed by this PR: ', closedIssues)
 
-    closedIssues.forEach((issue) => {
-      robot.log.debug(`[PR OPENED] Adding label ${labelName} to issue ${issue}`)
+  closedIssues.forEach((issue) => {
+    robot.log.debug(`[PR OPENED] Adding label ${labelName} to issue ${issue}`)
 
-      context.github.issues.addLabels({
-        ...repoInfo,
-        number: issue,
-        labels: [labelName],
-      })
+    context.github.issues.addLabels({
+      ...repoInfo,
+      number: issue,
+      labels: [labelName],
     })
   })
+}
+
+module.exports = (robot) => {
+  handleOpenedPr = handleOpenedPr.bind(null, robot)
+
+  robot.on('pull_request.opened', handleOpenedPr)
+
+  robot.on('pull_request.reopened', handleOpenedPr)
 
   robot.on('pull_request.closed', async context => {
     const { labelName, keywords } = await getConfig(context, robot)
