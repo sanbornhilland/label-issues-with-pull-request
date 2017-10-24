@@ -36,7 +36,7 @@ async function getUserConfig(context, robot) {
 }
 
 async function getConfig(context, robot) {
-  const userConfig = await getUserConfig(context)
+  const userConfig = await getUserConfig(context, robot)
 
   const config = {
     ...defaultConfig,
@@ -49,23 +49,6 @@ async function getConfig(context, robot) {
 }
 
 module.exports = (robot) => {
-  robot.on('pull_request.closed', async context => {
-    const { labelName, keywords } = await getConfig(context, robot)
-    const closedIssues = await getClosedIssues(context, keywords)
-
-    robot.debug('[PR CLOSED] Issues closed by this PR: ', closedIssues)
-
-    closedIssues.forEach((issue) => {
-      robot.debug(`[PR CLOSED] Removing label ${labelName} from ${issue}`)
-      // I don't know why I can't do await with a try/catch here.
-      context.github.issues.removeLabel(context.repo({
-        number: issue,
-        name: labelName,
-      }))
-      .catch(robot.error)
-    })
-  })
-
   robot.on('pull_request.opened', async context => {
     const { labelName, labelColor, keywords } = await getConfig(context, robot)
     const closedIssues = await getClosedIssues(context, keywords)
@@ -82,6 +65,23 @@ module.exports = (robot) => {
         number: issue,
         labels: [labelName],
       })
+    })
+  })
+
+  robot.on('pull_request.closed', async context => {
+    const { labelName, keywords } = await getConfig(context, robot)
+    const closedIssues = await getClosedIssues(context, keywords)
+
+    robot.debug('[PR CLOSED] Issues closed by this PR: ', closedIssues)
+
+    closedIssues.forEach((issue) => {
+      robot.debug(`[PR CLOSED] Removing label ${labelName} from ${issue}`)
+      // I don't know why I can't do await with a try/catch here.
+      context.github.issues.removeLabel(context.repo({
+        number: issue,
+        name: labelName,
+      }))
+      .catch(robot.error)
     })
   })
 }
