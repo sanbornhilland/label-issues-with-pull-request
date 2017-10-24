@@ -17,7 +17,7 @@ async function createLabelIfNecessary(context, robot, labelName, labelColor) {
   const labels = await context.github.issues.getLabels(repoInfo)
 
   if (!labels.data.some(({ name }) => name === labelName)) {
-    robot.log.debug(`No label with name ${name} found. Creating a new label...`)
+    robot.log.debug(`No label with name ${labelName} found. Creating a new label...`)
 
     await context.github.issues.createLabel({
       ...repoInfo,
