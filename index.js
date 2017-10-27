@@ -4,9 +4,11 @@ const defaultConfig = require('./lib/defaultConfig.js')
 async function getClosedIssues(context, keywords) {
   const issueInfo = context.issue()
   const commits = await context.github.pullRequests.getCommits(issueInfo)
+  const body = context.payload.pull_request.body.toLowerCase()
 
   const filteredMessages = commits.data
     .map(({ commit }) => commit.message.toLowerCase())
+    .concat([body])
     .join('\n')
 
   return parser.extractIssueNumbers(filteredMessages, keywords)
@@ -53,8 +55,6 @@ async function handleOpenedPr(robot, context) {
   const closedIssues = await getClosedIssues(context, keywords)
   await createLabelIfNecessary(context, robot, labelName, labelColor)
   const repoInfo = context.repo()
-
-  robot.log.debug('[PR OPENED] PR Body: ', context.payload.pull_request.body)
 
   robot.log.debug('[PR OPENED] Issues that will be closed by this PR: ', closedIssues)
 
