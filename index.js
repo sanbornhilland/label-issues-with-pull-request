@@ -54,6 +54,8 @@ async function handleOpenedPr(robot, context) {
   await createLabelIfNecessary(context, robot, labelName, labelColor)
   const repoInfo = context.repo()
 
+  robot.log.debug('[PR OPENED] PR Body: ', context.payload.pull_request.body)
+
   robot.log.debug('[PR OPENED] Issues that will be closed by this PR: ', closedIssues)
 
   closedIssues.forEach((issue) => {
@@ -73,6 +75,8 @@ module.exports = (robot) => {
   robot.on('pull_request.opened', handleOpenedPr)
 
   robot.on('pull_request.reopened', handleOpenedPr)
+
+  robot.on('pull_request.edited', handleOpenedPr)
 
   robot.on('pull_request.closed', async context => {
     const { labelName, keywords } = await getConfig(context, robot)
