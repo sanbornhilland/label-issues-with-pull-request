@@ -16,7 +16,7 @@ async function getClosedIssues(context, keywords) {
 
 async function createLabelIfNecessary(context, robot, labelName, labelColor) {
   const repoInfo = context.repo()
-  const labels = await context.github.issues.getLabels(repoInfo)
+  const labels = await context.github.issues.getLabels({ ...repoInfo, per_page: 100 })
 
   if (!labels.data.some(({ name }) => name === labelName)) {
     robot.log.debug(`No label with name ${labelName} found. Creating a new label...`)
